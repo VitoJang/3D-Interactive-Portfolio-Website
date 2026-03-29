@@ -4,7 +4,7 @@ import { GLTFLoader, Octree, Capsule } from 'three-stdlib'
 const GRAVITY = 30
 const CAPSULE_RADIUS = 0.35
 const CAPSULE_HEIGHT = 1
-const MOVE_SPEED = 2.5
+const MOVE_SPEED = 3
 
 export type InitOptions = {
   canvas: HTMLCanvasElement
