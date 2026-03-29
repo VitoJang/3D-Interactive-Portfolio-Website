@@ -8,6 +8,8 @@ const MOVE_SPEED = 2.5
 
 export type InitOptions = {
   canvas: HTMLCanvasElement
+  /** 0–1 while the GLB is downloading/decoding */
+  onLoadProgress?: (ratio: number) => void
   onLoaded?: () => void
   onHotspotClick?: (id: string) => void
   onCursorChange?: (pointer: boolean) => void
@@ -32,6 +34,7 @@ export function disposeThree() {
 
 export function initThree({
   canvas,
+  onLoadProgress,
   onLoaded,
   onHotspotClick,
   onCursorChange,
@@ -40,7 +43,7 @@ export function initThree({
   scene.background = new THREE.Color(0x87ceeb)
 
   // Renderer
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true })
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false })
   renderer.setSize(window.innerWidth, window.innerHeight)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   renderer.shadowMap.enabled = true
@@ -203,11 +206,18 @@ export function initThree({
         introProgress = 0
       }
 
+      onLoadProgress?.(1)
       onLoaded?.()
     },
-    undefined,
+    (progressEvent) => {
+      const e = progressEvent as ProgressEvent
+      if (e.lengthComputable && e.total > 0) {
+        onLoadProgress?.(e.loaded / e.total)
+      }
+    },
     (error) => {
       console.error('Error loading GLB:', error)
+      onLoadProgress?.(1)
       onLoaded?.()
     },
   )

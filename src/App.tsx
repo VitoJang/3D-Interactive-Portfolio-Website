@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import type { CSSProperties, MouseEvent } from 'react'
 import './App.css'
 import { initThree, disposeThree, setModalOpen, startEnterAnimation } from './three/scene'
 import gsap from 'gsap'
@@ -67,7 +68,10 @@ const modalContent: Record<string, ModalEntry> = {
         <li>Participated in collaborative development on <strong>GitHub</strong> through extensive code reviews and engaged in system design meetings with the UI/UX team.</li>
       </ul>
     </>,
-    images: [],
+    images: [
+      '/images/MarketLyfe/marketlyfe1.JPG',
+      '/images/MarketLyfe/marketlyfe2.jpg'
+    ],
     links: [
       { label: 'LinkedIn', url: 'https://www.linkedin.com/company/casepilot-ai/posts/?feedView=all', icon: linkedinLogo },
     ],
@@ -237,12 +241,75 @@ const modalContent: Record<string, ModalEntry> = {
 
 const aboutMeTitleKeys = new Set(['TV', 'Sports', 'Travel', 'Cat', 'Board_Games'])
 
+function ImageLightboxContent({
+  src,
+  onImgClick,
+}: {
+  src: string
+  onImgClick: (e: MouseEvent<HTMLImageElement>) => void
+}) {
+  const [ready, setReady] = useState(false)
+  return (
+    <>
+      {!ready && (
+        <div className="image-lightbox-loading" aria-live="polite">
+          <span className="image-lightbox-spinner" aria-hidden="true" />
+          <span className="image-lightbox-loading-text">Loading image…</span>
+        </div>
+      )}
+      <img
+        src={src}
+        alt=""
+        className={`image-lightbox-image${ready ? ' image-lightbox-image--visible' : ''}`}
+        onClick={onImgClick}
+        onLoad={() => setReady(true)}
+        onError={() => setReady(true)}
+      />
+    </>
+  )
+}
+
+function ModalImageButton({
+  src,
+  onOpen,
+  buttonClassName = '',
+  imgClassName = 'modal-image',
+  tabIndex,
+}: {
+  src: string
+  onOpen: (src: string) => void
+  buttonClassName?: string
+  imgClassName?: string
+  tabIndex?: number
+}) {
+  const [loaded, setLoaded] = useState(false)
+  return (
+    <button
+      type="button"
+      className={`modal-image-button ${buttonClassName} ${loaded ? 'modal-image-button--loaded' : ''}`.trim()}
+      onClick={() => onOpen(src)}
+      {...(tabIndex !== undefined ? { tabIndex } : {})}
+      aria-label="Open image preview"
+    >
+      <span className="modal-image-loading-skeleton" aria-hidden="true" />
+      <img
+        src={src}
+        alt=""
+        className={`${imgClassName} modal-image-with-loader`.trim()}
+        onLoad={() => setLoaded(true)}
+        onError={() => setLoaded(true)}
+      />
+    </button>
+  )
+}
+
 function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const aboutMeBeltViewportRef = useRef<HTMLDivElement | null>(null)
   const aboutMeBeltTrackRef = useRef<HTMLDivElement | null>(null)
   const aboutMeBeltFirstSetRef = useRef<HTMLDivElement | null>(null)
   const [loading, setLoading] = useState(true)
+  const [worldLoadProgress, setWorldLoadProgress] = useState(0)
   const [entered, setEntered] = useState(false)
   const [activeModal, setActiveModal] = useState<string | null>(null)
   const [activeImage, setActiveImage] = useState<string | null>(null)
@@ -258,7 +325,11 @@ function App() {
 
     const cleanup = initThree({
       canvas: canvasRef.current,
-      onLoaded: () => setLoading(false),
+      onLoadProgress: (ratio) => setWorldLoadProgress(ratio),
+      onLoaded: () => {
+        setWorldLoadProgress(1)
+        setLoading(false)
+      },
       onHotspotClick: (id) => setActiveModal(id),
       onCursorChange: (isPointer) => setPointerCursor(isPointer),
     })
@@ -390,7 +461,26 @@ function App() {
       {/* Loading / enter screen */}
       <div className={`loading-screen${entered ? ' fade-out' : ''}`}>
         {loading ? (
-          <div className="loading-text">Loading...</div>
+          <div className="loading-screen-content">
+            <p className="loading-text">Loading world…</p>
+            <div
+              className="loading-progress-track"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(worldLoadProgress * 100)}
+              aria-label="World loading progress"
+            >
+              <div
+                className="loading-progress-fill"
+                style={
+                  {
+                    '--load-pct': `${Math.max(2, worldLoadProgress * 100)}%`,
+                  } as CSSProperties
+                }
+              />
+            </div>
+          </div>
         ) : !entered ? (
           <button className="enter-button" type="button" onClick={handleEnter}>
             Enter World!
@@ -469,30 +559,26 @@ function App() {
                       <div className="modal-image-gallery-aboutme-belt-track" ref={aboutMeBeltTrackRef}>
                         <div className="modal-image-gallery-aboutme-belt-set" ref={aboutMeBeltFirstSetRef}>
                           {aboutMeImages.map((src, i) => (
-                            <button
+                            <ModalImageButton
                               key={`aboutme-primary-${src}-${i}`}
-                              type="button"
-                              className="modal-image-button modal-image-button-aboutme"
-                              onClick={() => setActiveImage(src)}
-                              aria-label="Open image preview"
-                            >
-                              <img src={src} alt="" className="modal-image" />
-                            </button>
+                              src={src}
+                              onOpen={setActiveImage}
+                              buttonClassName="modal-image-button-aboutme"
+                              imgClassName="modal-image"
+                            />
                           ))}
                         </div>
 
                         <div className="modal-image-gallery-aboutme-belt-set" aria-hidden="true">
                           {aboutMeImages.map((src, i) => (
-                            <button
+                            <ModalImageButton
                               key={`aboutme-clone-${src}-${i}`}
-                              type="button"
-                              className="modal-image-button modal-image-button-aboutme"
-                              onClick={() => setActiveImage(src)}
-                              aria-label="Open image preview"
+                              src={src}
+                              onOpen={setActiveImage}
+                              buttonClassName="modal-image-button-aboutme"
+                              imgClassName="modal-image"
                               tabIndex={-1}
-                            >
-                              <img src={src} alt="" className="modal-image" />
-                            </button>
+                            />
                           ))}
                         </div>
                       </div>
@@ -500,15 +586,11 @@ function App() {
                   ) : (
                     <div className="modal-image-gallery">
                       {modalContent[activeModal].images!.map((src, i) => (
-                        <button
+                        <ModalImageButton
                           key={i}
-                          type="button"
-                          className="modal-image-button"
-                          onClick={() => setActiveImage(src)}
-                          aria-label="Open image preview"
-                        >
-                          <img src={src} alt="" className="modal-image" />
-                        </button>
+                          src={src}
+                          onOpen={setActiveImage}
+                        />
                       ))}
                     </div>
                   )
@@ -530,11 +612,10 @@ function App() {
               >
                 &#x2715;
               </button>
-              <img
+              <ImageLightboxContent
+                key={activeImage}
                 src={activeImage}
-                alt=""
-                className="image-lightbox-image"
-                onClick={(e) => e.stopPropagation()}
+                onImgClick={(e) => e.stopPropagation()}
               />
             </div>
           )}
