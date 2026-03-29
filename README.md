@@ -8,7 +8,7 @@ Interactive **3D portfolio** built with **React**, **TypeScript**, **Vite**, **T
 - Three.js (scene, GLTF, raycasting, octree collision)  
 - Blender (environment & character/animation)
 
-## VitoFolio — site screenshots
+## Preview
 
 <p align="center">
   <img src="./public/images/Projects/folio1.png" alt="VitoFolio 3D portfolio — view 1" width="32%" />
