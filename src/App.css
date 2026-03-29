@@ -251,6 +251,53 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+.modal-description-list > li.modal-description-role {
+  list-style: none;
+  margin-left: -20px;
+  margin-bottom: 6px;
+}
+
+.modal-ssa-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.modal-ssa-role-line {
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.modal-ssa-insta-link {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  color: #ad8671;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.modal-ssa-insta-link:hover {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.modal-ssa-insta-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
 .modal-contributions-list {
   margin: 0;
   padding-left: 20px;

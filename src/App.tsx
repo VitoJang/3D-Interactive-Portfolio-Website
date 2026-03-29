@@ -25,6 +25,18 @@ const folio1 = '/images/Projects/folio1.png'
 const folio2 = '/images/Projects/folio2.png'
 const folio3 = '/images/Projects/folio3.png'
 
+/** UTS SSA gallery — ascending ssa1 … ssa8 (extensions match files in /public/images/UTS/) */
+const utsSsaImages = [
+  '/images/UTS/ssa1.jpg',
+  '/images/UTS/ssa2.JPEG',
+  '/images/UTS/ssa3.jpg',
+  '/images/UTS/ssa4.jpg',
+  '/images/UTS/ssa5.JPG',
+  '/images/UTS/ssa6.JPG',
+  '/images/UTS/ssa7.JPG',
+  '/images/UTS/ssa8.JPG',
+]
+
 type ModalLink = { label: string; url: string; icon?: string }
 
 type ModalEntry = {
@@ -233,13 +245,58 @@ const modalContent: Record<string, ModalEntry> = {
     subtitle: 'Bachelor of Software Engineering (Honours) | Feb 2022 – May 2026',
     description:
       <>
-        I am a <strong>penultimate year Software Engineering student</strong> at the University of Technology Sydney, with a focus on full-stack development, machine learning, and software project management. Currently have a <strong>Distinction average WAM of 79.41</strong> (GPA of 6.07).
+        <p>
+          I am a <strong>final year Software Engineering student</strong> at the University of Technology Sydney, with a focus on full-stack development, machine learning, and software project management. Currently have a <strong>Distinction average WAM of 79.41</strong> (GPA of 6.07).
+        </p>
+        <ul className="modal-description-list">
+          <li className="modal-description-role">
+            <div className="modal-ssa-title-row">
+              <strong>UTS Social Sports Association (SSA)</strong>
+              <a
+                className="modal-ssa-insta-link"
+                href="https://www.instagram.com/ssa_uts/"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <img src={instaLogo} alt="" className="modal-ssa-insta-icon" />
+                @ssa_uts
+              </a>
+            </div>
+            <div className="modal-ssa-role-line">
+              <strong>External Vice President</strong>
+              {' · '}
+              Jan 2023 – Jan 2025
+              {' | '}
+              <strong>Club Advisor</strong>
+              {' · '}
+              Jan 2025 – 2026
+            </div>
+          </li>
+          <li>
+            Initiated, negotiated, and <strong>secured sponsorships</strong> with key partners including <strong>Domino&apos;s (Pyrmont/CBD)</strong>, <strong>SupplyBase</strong>, <strong>Skillry</strong>, <strong>Aptus Sport</strong>, <strong>SportAll</strong>, and <strong>RedBull Australia</strong>.
+          </li>
+          <li>
+            Grew SSA&apos;s community to over <strong>600 members</strong> by organising inclusive social sporting events <strong>throughout my 2-year tenure</strong>.
+          </li>
+          <li>
+            <strong>Nominated</strong> for <strong>SSA&apos;s Club Person of the Year 2024</strong>.
+          </li>
+          <li>
+            Established and <strong>organised SSA&apos;s sub-committee</strong> and facilitated a smooth transition of roles during the <strong>Annual General Meeting (AGM)</strong> for the year <strong>2025</strong>.
+          </li>
+          <li>
+            <strong>Nominated</strong> for <strong>SSA&apos;s Club Advisor</strong> for <strong>2025</strong>.
+          </li>
+        </ul>
       </>,
-    images: [],
+    images: utsSsaImages,
   },
 }
 
 const aboutMeTitleKeys = new Set(['TV', 'Sports', 'Travel', 'Cat', 'Board_Games'])
+/** Modals that use the horizontal image belt (About Me + UTS SSA photos) */
+const beltGalleryModalKeys = new Set([...aboutMeTitleKeys, 'UTS'])
 
 function ImageLightboxContent({
   src,
@@ -315,8 +372,8 @@ function App() {
   const [activeImage, setActiveImage] = useState<string | null>(null)
   const [pointerCursor, setPointerCursor] = useState(false)
 
-  const aboutMeImages = useMemo(() => {
-    if (!activeModal || !aboutMeTitleKeys.has(activeModal)) return []
+  const beltGalleryImages = useMemo(() => {
+    if (!activeModal || !beltGalleryModalKeys.has(activeModal)) return []
     return modalContent[activeModal]?.images ?? []
   }, [activeModal])
 
@@ -407,8 +464,8 @@ function App() {
   }, [activeImage])
 
   useLayoutEffect(() => {
-    if (!activeModal || !aboutMeTitleKeys.has(activeModal)) return
-    if (aboutMeImages.length === 0) return
+    if (!activeModal || !beltGalleryModalKeys.has(activeModal)) return
+    if (beltGalleryImages.length === 0) return
     if (!aboutMeBeltViewportRef.current || !aboutMeBeltTrackRef.current || !aboutMeBeltFirstSetRef.current) return
 
     const viewportEl = aboutMeBeltViewportRef.current
@@ -480,7 +537,7 @@ function App() {
       if (stopTimer !== null) window.clearTimeout(stopTimer)
       beltTweenRef.current?.kill()
     }
-  }, [activeModal, aboutMeImages])
+  }, [activeModal, beltGalleryImages])
 
   return (
     <>
@@ -589,13 +646,13 @@ function App() {
                 )}
 
                 {modalContent[activeModal].images && modalContent[activeModal].images!.length > 0 && (
-                  aboutMeTitleKeys.has(activeModal) ? (
+                  beltGalleryModalKeys.has(activeModal) ? (
                     <div className="modal-image-gallery-aboutme-belt" ref={aboutMeBeltViewportRef}>
                       <div className="modal-image-gallery-aboutme-belt-track" ref={aboutMeBeltTrackRef}>
                         <div className="modal-image-gallery-aboutme-belt-set" ref={aboutMeBeltFirstSetRef}>
-                          {aboutMeImages.map((src, i) => (
+                          {beltGalleryImages.map((src, i) => (
                             <ModalImageButton
-                              key={`aboutme-primary-${src}-${i}`}
+                              key={`belt-primary-${src}-${i}`}
                               src={src}
                               onOpen={setActiveImage}
                               buttonClassName="modal-image-button-aboutme"
@@ -605,9 +662,9 @@ function App() {
                         </div>
 
                         <div className="modal-image-gallery-aboutme-belt-set" aria-hidden="true">
-                          {aboutMeImages.map((src, i) => (
+                          {beltGalleryImages.map((src, i) => (
                             <ModalImageButton
-                              key={`aboutme-clone-${src}-${i}`}
+                              key={`belt-clone-${src}-${i}`}
                               src={src}
                               onOpen={setActiveImage}
                               buttonClassName="modal-image-button-aboutme"
