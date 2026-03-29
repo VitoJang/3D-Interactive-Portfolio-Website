@@ -1,4 +1,4 @@
-# VitoFolio
+# Personal 3D Interactive Portfolio Website Project (VitoFolio)
 
 Interactive **3D portfolio** built with **React**, **TypeScript**, **Vite**, **Three.js**, and **Blender**. Explore a low-poly island, move a character with WASD / arrow keys, and click hotspots to read about projects, work history, and interests.
 
