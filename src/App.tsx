@@ -102,13 +102,13 @@ const modalContent: Record<string, ModalEntry> = {
     description: <>
       An interactive <strong>3D portfolio website</strong> called <strong>"VitoFolio"</strong>, the very site you're exploring right now! Features a controllable and animated cat character (inspired by my cat), a fully custom low-poly <strong>Blender-designed</strong> island map, and interactive clickable objects to explore more about me, my projects, and my career.
       <ul className="modal-description-list">
-        <li>Built the 3D scene with <strong>Three.js</strong> including character object collision physics via <strong>Octree</strong> collision, <strong>raycasting</strong> for clickable objects, and smooth camera animations. Also implemented a WASD/Arrow keys <strong>camera-relative movement</strong>, <strong>walking animations</strong>, and a cinematic intro zoom sequence.</li>
-        <li>Designed and modelled the entire island environment and character in <strong>Blender</strong>, low-poly styled, and exported as <strong>GLB</strong>.</li>
+        <li>Built a low-poly 3D scene with <strong>Three.js</strong> and integrated character object collision physics via <strong>Octree</strong> collision, <strong>raycasting</strong> for interactable objects, smooth camera animations, and implemented WASD/Arrow keys camera-relative movement.</li>
+        <li>Designed and modelled the entire island environment and character, including its walking animation, in <strong>Blender</strong>.</li>
       </ul>
     </>,
     images: [folio1, folio2, folio3],
     links: [
-      { label: 'GitHub', url: '#', icon: githubLogo },
+      { label: 'GitHub', url: 'https://github.com/VitoJang/VitoFolio', icon: githubLogo },
     ]
   },
   'Project_Three': {
@@ -136,9 +136,9 @@ const modalContent: Record<string, ModalEntry> = {
       </ul>
     </>,
     images: [nnfl1, nnfl3, nnfl2],
-    links: [
-      { label: 'GitHub', url: '#', icon: githubLogo },
-    ]
+    // links: [
+    //   { label: 'GitHub', url: '#', icon: githubLogo },
+    // ]
   },
   'Project_Five': {
     title: 'CNN Driver Fatigue Detection System',
@@ -154,9 +154,9 @@ const modalContent: Record<string, ModalEntry> = {
       </ul>
     </>,
     images: [dfdsystem1, dfdsystem2],
-    links: [
-      { label: 'GitHub', url: '#', icon: githubLogo },
-    ]
+    // links: [
+    //   { label: 'GitHub', url: '#', icon: githubLogo },
+    // ]
   },
 
   // ── About Me Street ──
@@ -320,15 +320,50 @@ function App() {
     return modalContent[activeModal]?.images ?? []
   }, [activeModal])
 
+  const realGltfProgressRef = useRef(0)
+  const worldLoadTickRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    if (!loading) return
+
+    const start = performance.now()
+    realGltfProgressRef.current = 0
+
+    const tick = () => {
+      const elapsedSec = (performance.now() - start) / 1000
+      const k = 0.18
+      const asymptotic = 0.99 * (1 - Math.exp(-elapsedSec * k))
+      const fromNetwork = Math.min(0.99, realGltfProgressRef.current * 0.99)
+      const next = Math.min(0.99, Math.max(asymptotic, fromNetwork, 0.03))
+      setWorldLoadProgress(next)
+    }
+
+    tick()
+    worldLoadTickRef.current = window.setInterval(tick, 80)
+
+    return () => {
+      if (worldLoadTickRef.current !== null) {
+        clearInterval(worldLoadTickRef.current)
+        worldLoadTickRef.current = null
+      }
+    }
+  }, [loading])
+
   useEffect(() => {
     if (!canvasRef.current) return
 
     const cleanup = initThree({
       canvas: canvasRef.current,
-      onLoadProgress: (ratio) => setWorldLoadProgress(ratio),
+      onLoadProgress: (ratio) => {
+        realGltfProgressRef.current = Math.max(realGltfProgressRef.current, ratio)
+      },
       onLoaded: () => {
+        if (worldLoadTickRef.current !== null) {
+          clearInterval(worldLoadTickRef.current)
+          worldLoadTickRef.current = null
+        }
         setWorldLoadProgress(1)
-        setLoading(false)
+        window.setTimeout(() => setLoading(false), 420)
       },
       onHotspotClick: (id) => setActiveModal(id),
       onCursorChange: (isPointer) => setPointerCursor(isPointer),
