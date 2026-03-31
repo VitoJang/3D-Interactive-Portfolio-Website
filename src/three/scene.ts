@@ -70,7 +70,7 @@ export function initThree({
   const cameraOffset = new THREE.Vector3(30, 35, 20)
   const cameraPan = new THREE.Vector3(6, 2, 9)
 
-  // Intro: Phase 1 = descend from sky to zoomed-out overview, Phase 2 = zoom in to gameplay
+  // Zoom in introduction animation
   const DESCEND_DURATION = 2.0
   const ZOOM_DURATION = 2.5
   const ZOOM_OUT_FACTOR = 3.5
@@ -78,6 +78,11 @@ export function initThree({
   let introPhase: 'idle' | 'descend' | 'zoom' | 'done' = 'idle'
   let introProgress = 0
   let inputEnabled = false
+
+  // User scroll-controlled zoom during gameplay
+  const MIN_ZOOM = 1
+  const MAX_ZOOM = 4
+  let userZoom = 1
 
   // Lighting
   const sun = new THREE.DirectionalLight(0xffffff, 1)
@@ -430,12 +435,54 @@ export function initThree({
     handleInteraction()
   }
 
+  let pinchStartDistance: number | null = null
+  let pinchStartZoom = MIN_ZOOM
+
+  function getTouchDistance(a: Touch, b: Touch): number {
+    const dx = a.clientX - b.clientX
+    const dy = a.clientY - b.clientY
+    return Math.hypot(dx, dy)
+  }
+
   function onTouchStart(e: TouchEvent) {
+    if (introPhase !== 'done') return
     if (modalOpen) return
     if (e.touches.length === 0) return
+
+    if (e.touches.length === 1) {
+      // Single tap -> interaction
+      e.preventDefault()
+      updatePointerFromTouch(e.touches[0])
+      handleInteraction()
+      pinchStartDistance = null
+    } else if (e.touches.length === 2) {
+      // Begin pinch gesture
+      e.preventDefault()
+      pinchStartDistance = getTouchDistance(e.touches[0], e.touches[1])
+      pinchStartZoom = userZoom
+    }
+  }
+
+  function onTouchMove(e: TouchEvent) {
+    if (introPhase !== 'done') return
+    if (modalOpen) return
+    if (e.touches.length !== 2) return
+    if (pinchStartDistance === null) return
+
     e.preventDefault()
-    updatePointerFromTouch(e.touches[0])
-    handleInteraction()
+    const currentDistance = getTouchDistance(e.touches[0], e.touches[1])
+    if (currentDistance <= 0) return
+
+    const scale = currentDistance / pinchStartDistance
+    userZoom = pinchStartZoom / scale
+    if (userZoom < MIN_ZOOM) userZoom = MIN_ZOOM
+    if (userZoom > MAX_ZOOM) userZoom = MAX_ZOOM
+  }
+
+  function onTouchEnd(e: TouchEvent) {
+    if (e.touches.length < 2) {
+      pinchStartDistance = null
+    }
   }
 
   // Resize
@@ -448,6 +495,18 @@ export function initThree({
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   }
 
+  function onWheel(e: WheelEvent) {
+    if (introPhase !== 'done') return
+    if (modalOpen) return
+    const delta = e.deltaY
+    if (delta === 0) return
+    e.preventDefault()
+    const zoomSpeed = 0.002
+    userZoom += delta * zoomSpeed
+    if (userZoom < MIN_ZOOM) userZoom = MIN_ZOOM
+    if (userZoom > MAX_ZOOM) userZoom = MAX_ZOOM
+  }
+
   // Event listeners
   window.addEventListener('resize', onResize)
   window.addEventListener('keydown', onKeyDown)
@@ -455,7 +514,10 @@ export function initThree({
   window.addEventListener('blur', onBlur)
   window.addEventListener('mousemove', onMouseMove)
   window.addEventListener('click', onClick)
+  window.addEventListener('wheel', onWheel, { passive: false })
   canvas.addEventListener('touchstart', onTouchStart, { passive: false })
+  canvas.addEventListener('touchmove', onTouchMove, { passive: false })
+  canvas.addEventListener('touchend', onTouchEnd, { passive: false })
 
   function easeOutCubic(t: number): number {
     return 1 - Math.pow(1 - t, 3)
@@ -519,7 +581,9 @@ export function initThree({
         inputEnabled = true
       }
     } else if (introPhase === 'done' && character.instance) {
-      camera.position.copy(finalPos)
+      // Apply user-controlled zoom once intro is finished
+      const zoomedPos = new THREE.Vector3().copy(finalLook).addScaledVector(dir, userZoom)
+      camera.position.copy(zoomedPos)
       camera.lookAt(finalLook)
     } else {
       camera.position.copy(skyPos)
@@ -566,7 +630,10 @@ export function initThree({
     window.removeEventListener('blur', onBlur)
     window.removeEventListener('mousemove', onMouseMove)
     window.removeEventListener('click', onClick)
+    window.removeEventListener('wheel', onWheel)
     canvas.removeEventListener('touchstart', onTouchStart)
+    canvas.removeEventListener('touchmove', onTouchMove)
+    canvas.removeEventListener('touchend', onTouchEnd)
     disposeThree()
     renderer.dispose()
   }
