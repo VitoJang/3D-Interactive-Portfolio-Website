@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties, MouseEvent } from 'react'
 import './App.css'
-import { initThree, disposeThree, setModalOpen, startEnterAnimation } from './three/scene'
+import { initThree, disposeThree, setModalOpen, startEnterAnimation, type MoveInput } from './three/scene'
 import gsap from 'gsap'
 import githubLogo from './assets/github_logo.svg'
 import linkedinLogo from './assets/linkedin_logo.svg'
@@ -25,18 +25,6 @@ const folio1 = '/images/Projects/folio1.png'
 const folio2 = '/images/Projects/folio2.png'
 const folio3 = '/images/Projects/folio3.png'
 
-/** UTS SSA gallery — ascending ssa1 … ssa8 (extensions match files in /public/images/UTS/) */
-const utsSsaImages = [
-  '/images/UTS/ssa1.jpg',
-  '/images/UTS/ssa2.JPEG',
-  '/images/UTS/ssa3.jpg',
-  '/images/UTS/ssa4.jpg',
-  '/images/UTS/ssa5.JPG',
-  '/images/UTS/ssa6.JPG',
-  '/images/UTS/ssa7.JPG',
-  '/images/UTS/ssa8.JPG',
-]
-
 type ModalLink = { label: string; url: string; icon?: string }
 
 type ModalEntry = {
@@ -48,6 +36,7 @@ type ModalEntry = {
   links?: ModalLink[]
 }
 
+// ── Modal Content ──
 const modalContent: Record<string, ModalEntry> = {
   // ── Career Highway ──
   'DAPPA': {
@@ -202,9 +191,9 @@ const modalContent: Record<string, ModalEntry> = {
     title: 'Sports',
     description: 'Outside of my room, you will see me playing all sorts of sports and phyiscal activities. Soccer, badminton, pickleball, oztag, snowboarding, pickleball, golf, these are just some of the sports I play throughout the year. My favourite at the moment is tennis, a sport I recently picked up and have been getting humbled on.',
     images: [
-      '/images/AboutMe/sports1.jpg', 
-      '/images/AboutMe/sports2.jpg', 
-      '/images/AboutMe/sports3.jpg', 
+      '/images/AboutMe/sports1.jpg',
+      '/images/AboutMe/sports2.jpg',
+      '/images/AboutMe/sports3.jpg',
       '/images/AboutMe/sports4.jpg',
       '/images/AboutMe/sports5.jpg',
       '/images/AboutMe/sports6.jpg',
@@ -290,7 +279,16 @@ const modalContent: Record<string, ModalEntry> = {
           </li>
         </ul>
       </>,
-    images: utsSsaImages,
+    images: [
+      '/images/UTS/ssa1.jpg',
+      '/images/UTS/ssa2.JPEG',
+      '/images/UTS/ssa3.jpg',
+      '/images/UTS/ssa4.jpg',
+      '/images/UTS/ssa5.JPG',
+      '/images/UTS/ssa6.JPG',
+      '/images/UTS/ssa7.JPG',
+      '/images/UTS/ssa8.JPG'
+    ],
   },
 }
 
@@ -362,6 +360,7 @@ function ModalImageButton({
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const moveInputRef = useRef<MoveInput>({ x: 0, y: 0 })
   const aboutMeBeltViewportRef = useRef<HTMLDivElement | null>(null)
   const aboutMeBeltTrackRef = useRef<HTMLDivElement | null>(null)
   const aboutMeBeltFirstSetRef = useRef<HTMLDivElement | null>(null)
@@ -371,6 +370,15 @@ function App() {
   const [activeModal, setActiveModal] = useState<string | null>(null)
   const [activeImage, setActiveImage] = useState<string | null>(null)
   const [pointerCursor, setPointerCursor] = useState(false)
+  const [joystickPos, setJoystickPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
+  const ua = typeof navigator !== 'undefined'
+    ? navigator.userAgent  || ''
+    : ''
+  const isMobileOS =
+    /Android/i.test(ua) ||
+    /iPhone/i.test(ua) ||
+    /iPad/i.test(ua) ||
+    /iPod/i.test(ua)
 
   const beltGalleryImages = useMemo(() => {
     if (!activeModal || !beltGalleryModalKeys.has(activeModal)) return []
@@ -424,13 +432,14 @@ function App() {
       },
       onHotspotClick: (id) => setActiveModal(id),
       onCursorChange: (isPointer) => setPointerCursor(isPointer),
+      getMoveInput: isMobileOS ? () => moveInputRef.current : undefined,
     })
 
     return () => {
       cleanup()
       disposeThree()
     }
-  }, [])
+  }, [isMobileOS])
 
   const handleEnter = useCallback(() => {
     setEntered(true)
@@ -582,6 +591,64 @@ function App() {
           <div className="instructions">~ use WASD or arrow keys to move ~</div>
         )}
       </div>
+
+      {/* Mobile joystick */}
+      {entered && isMobileOS && (
+        <div
+          className="joystick-container"
+          onTouchStart={(e) => {
+            const touch = e.touches[0]
+            if (!touch) return
+            const target = e.currentTarget
+            const rect = target.getBoundingClientRect()
+            const cx = rect.left + rect.width / 2
+            const cy = rect.top + rect.height / 2
+            const dx = touch.clientX - cx
+            const dy = touch.clientY - cy
+            const radius = rect.width / 2
+            const len = Math.sqrt(dx * dx + dy * dy) || 1
+            const clamped = Math.min(len, radius)
+            const nx = (dx / len) * (clamped / radius)
+            const ny = (dy / len) * (clamped / radius)
+            moveInputRef.current = { x: nx, y: -ny }
+            setJoystickPos({ x: nx, y: ny })
+          }}
+          onTouchMove={(e) => {
+            const touch = e.touches[0]
+            if (!touch) return
+            const target = e.currentTarget
+            const rect = target.getBoundingClientRect()
+            const cx = rect.left + rect.width / 2
+            const cy = rect.top + rect.height / 2
+            const dx = touch.clientX - cx
+            const dy = touch.clientY - cy
+            const radius = rect.width / 2
+            const len = Math.sqrt(dx * dx + dy * dy) || 1
+            const clamped = Math.min(len, radius)
+            const nx = (dx / len) * (clamped / radius)
+            const ny = (dy / len) * (clamped / radius)
+            moveInputRef.current = { x: nx, y: -ny }
+            setJoystickPos({ x: nx, y: ny })
+          }}
+          onTouchEnd={() => {
+            moveInputRef.current = { x: 0, y: 0 }
+            setJoystickPos({ x: 0, y: 0 })
+          }}
+          onTouchCancel={() => {
+            moveInputRef.current = { x: 0, y: 0 }
+            setJoystickPos({ x: 0, y: 0 })
+          }}
+        >
+          <div className="joystick-base">
+            <div
+              className="joystick-knob"
+              style={{
+                transform: `translate(${joystickPos.x * 32}px, ${joystickPos.y * 32}px)`,
+              }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Modal for clicked objects — stopImmediatePropagation prevents the
            native window click listener (raycast) from firing through the modal */}

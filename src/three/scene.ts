@@ -6,6 +6,13 @@ const CAPSULE_RADIUS = 0.35
 const CAPSULE_HEIGHT = 1
 const MOVE_SPEED = 3
 
+export type MoveInput = {
+  /** Horizontal: -1 left, +1 right (screen space) */
+  x: number
+  /** Vertical: -1 back, +1 forward (screen space) */
+  y: number
+}
+
 export type InitOptions = {
   canvas: HTMLCanvasElement
   /** 0–1 while the GLB is downloading/decoding */
@@ -13,6 +20,8 @@ export type InitOptions = {
   onLoaded?: () => void
   onHotspotClick?: (id: string) => void
   onCursorChange?: (pointer: boolean) => void
+  /** Optional movement source for mobile joystick / virtual pad */
+  getMoveInput?: () => MoveInput
 }
 
 let modalOpen = false
@@ -38,6 +47,7 @@ export function initThree({
   onLoaded,
   onHotspotClick,
   onCursorChange,
+  getMoveInput,
 }: InitOptions) {
   const scene = new THREE.Scene()
   scene.background = new THREE.Color(0x87ceeb)
@@ -275,10 +285,21 @@ export function initThree({
     camRight.crossVectors(worldUp, camForward).normalize().negate()
 
     moveDirection.set(0, 0, 0)
+
+    // Keyboard input (desktop)
     if (pressedButtons.up) moveDirection.add(camForward)
     if (pressedButtons.down) moveDirection.sub(camForward)
     if (pressedButtons.right) moveDirection.add(camRight)
     if (pressedButtons.left) moveDirection.sub(camRight)
+
+    // Virtual joystick / mobile input
+    if (getMoveInput) {
+      const { x: joyX, y: joyY } = getMoveInput()
+      if (Math.abs(joyX) > 0.01 || Math.abs(joyY) > 0.01) {
+        moveDirection.addScaledVector(camForward, joyY)
+        moveDirection.addScaledVector(camRight, joyX)
+      }
+    }
 
     const walking = moveDirection.lengthSq() > 0
 
@@ -357,6 +378,14 @@ export function initThree({
     pointer.y = -(e.clientY / window.innerHeight) * 2 + 1
   }
 
+  function updatePointerFromTouch(touch: Touch) {
+    const rect = canvas.getBoundingClientRect()
+    const nx = (touch.clientX - rect.left) / rect.width
+    const ny = (touch.clientY - rect.top) / rect.height
+    pointer.x = nx * 2 - 1
+    pointer.y = -(ny * 2 - 1)
+  }
+
   function findInteractable(obj: THREE.Object3D): THREE.Object3D | null {
     let cur: THREE.Object3D | null = obj
     while (cur) {
@@ -401,6 +430,14 @@ export function initThree({
     handleInteraction()
   }
 
+  function onTouchStart(e: TouchEvent) {
+    if (modalOpen) return
+    if (e.touches.length === 0) return
+    e.preventDefault()
+    updatePointerFromTouch(e.touches[0])
+    handleInteraction()
+  }
+
   // Resize
   function onResize() {
     const w = window.innerWidth
@@ -418,6 +455,7 @@ export function initThree({
   window.addEventListener('blur', onBlur)
   window.addEventListener('mousemove', onMouseMove)
   window.addEventListener('click', onClick)
+  canvas.addEventListener('touchstart', onTouchStart, { passive: false })
 
   function easeOutCubic(t: number): number {
     return 1 - Math.pow(1 - t, 3)
@@ -528,6 +566,7 @@ export function initThree({
     window.removeEventListener('blur', onBlur)
     window.removeEventListener('mousemove', onMouseMove)
     window.removeEventListener('click', onClick)
+    canvas.removeEventListener('touchstart', onTouchStart)
     disposeThree()
     renderer.dispose()
   }
