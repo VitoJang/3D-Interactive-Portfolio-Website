@@ -2,6 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { CSSProperties, MouseEvent } from 'react'
 import './App.css'
 import { initThree, disposeThree, setModalOpen, startEnterAnimation, type MoveInput } from './three/scene'
+import screenRotateIcon from './assets/screen-rotate.svg'
 import gsap from 'gsap'
 import githubLogo from './assets/github_logo.svg'
 import linkedinLogo from './assets/linkedin_logo.svg'
@@ -371,14 +372,21 @@ function App() {
   const [activeImage, setActiveImage] = useState<string | null>(null)
   const [pointerCursor, setPointerCursor] = useState(false)
   const [joystickPos, setJoystickPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
-  const ua = typeof navigator !== 'undefined'
-    ? navigator.userAgent  || ''
-    : ''
+
+
+  // Check if the device is a mobile device using touch input
   const isMobileOS =
-    /Android/i.test(ua) ||
-    /iPhone/i.test(ua) ||
-    /iPad/i.test(ua) ||
-    /iPod/i.test(ua)
+    typeof window !== 'undefined' &&
+    (('ontouchstart' in window) ||
+      (navigator as Navigator & { maxTouchPoints?: number }).maxTouchPoints! > 0)
+
+  // Block portrait on phones to give users a better experience
+  const [showRotateHint, setShowRotateHint] = useState(() => {
+    if (!isMobileOS || typeof window === 'undefined') return false
+    const isPortrait = window.innerHeight >= window.innerWidth
+    const isPhoneSized = window.innerWidth < 768
+    return isPortrait && isPhoneSized
+  })
 
   const beltGalleryImages = useMemo(() => {
     if (!activeModal || !beltGalleryModalKeys.has(activeModal)) return []
@@ -388,6 +396,26 @@ function App() {
   const realGltfProgressRef = useRef(0)
   const worldLoadTickRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  // Update the rotate hint based on the window size
+  useEffect(() => {
+    if (!isMobileOS) return
+    if (typeof window === 'undefined') return
+
+    const handleResize = () => {
+      const isPortrait = window.innerHeight >= window.innerWidth
+      const isPhoneSized = window.innerWidth < 768
+      setShowRotateHint(isPortrait && isPhoneSized)
+    }
+
+    window.addEventListener('resize', handleResize)
+    window.addEventListener('orientationchange', handleResize as EventListener)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      window.removeEventListener('orientationchange', handleResize as EventListener)
+    }
+  }, [isMobileOS])
+
+  // Update the world load progress based on the GLTF download progress
   useEffect(() => {
     if (!loading) return
 
@@ -414,6 +442,7 @@ function App() {
     }
   }, [loading])
 
+  // Initialize Three.js scene
   useEffect(() => {
     if (!canvasRef.current) return
 
@@ -450,7 +479,6 @@ function App() {
     setActiveImage(null)
     setModalOpen(false)
   }, [])
-
   const handleCloseImage = useCallback(() => {
     setActiveImage(null)
   }, [])
@@ -559,6 +587,18 @@ function App() {
         />
       </div>
 
+      {/* Rotate device hint for users holding portrait mode */}
+      {showRotateHint && (
+        <div className="rotate-hint-overlay">
+          <div className="rotate-hint-card">
+            <img src={screenRotateIcon} alt="" className="rotate-hint-icon" />
+            <p className="rotate-hint-text">
+              For the best view of the island and overall experience, rotate your phone to landscape.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Loading / enter screen */}
       <div className={`loading-screen${entered ? ' fade-out' : ''}`}>
         {loading ? (
@@ -650,8 +690,7 @@ function App() {
         </div>
       )}
 
-      {/* Modal for clicked objects — stopImmediatePropagation prevents the
-           native window click listener (raycast) from firing through the modal */}
+      {/* Modal for interactive objects */}
       {activeModal && modalContent[activeModal] && (
         <div
           className="modal-container"

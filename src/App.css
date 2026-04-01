@@ -591,8 +591,57 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.35);
 }
 
-@media (min-width: 900px) {
+@media (min-width: 900px) and (hover: hover) and (pointer: fine) {
   .joystick-container {
     display: none;
   }
+}
+
+/* Rotate device hint */
+.rotate-hint-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.rotate-hint-card {
+  max-width: 320px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 16px;
+  padding: 20px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: #fff;
+}
+
+.rotate-hint-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 12px;
+}
+
+.rotate-hint-text {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.75;
+  margin: 0 0 12px;
+}
+
+.rotate-hint-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 6px 18px;
+  background: #ffffff;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
 }
