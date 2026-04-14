@@ -190,9 +190,10 @@ const modalContent: Record<string, ModalEntry> = {
   },
   'Sports': {
     title: 'Sports',
-    description: 'Outside of my room, you will see me playing all sorts of sports and phyiscal activities. Soccer, badminton, pickleball, oztag, snowboarding, pickleball, golf, these are just some of the sports I play throughout the year. My favourite at the moment is tennis, a sport I recently picked up and have been getting humbled on.',
+    description: 'Outside of my room, you will see me playing all sorts of sports and phyiscal activities. Soccer, badminton, pickleball, oztag, snowboarding, volleyball, golf... these are some of many sports I play throughout the year. My favourite at the moment is tennis, a sport I recently picked up and have been getting humbled on (for now).',
     images: [
       '/images/AboutMe/sports1.jpg',
+      '/images/AboutMe/sports9.JPG',
       '/images/AboutMe/sports2.jpg',
       '/images/AboutMe/sports3.jpg',
       '/images/AboutMe/sports4.jpg',
