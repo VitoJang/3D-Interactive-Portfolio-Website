@@ -2,11 +2,20 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { CSSProperties, MouseEvent } from 'react'
 import './App.css'
 import { initThree, disposeThree, setModalOpen, startEnterAnimation, type MoveInput } from './three/scene'
-import screenRotateIcon from './assets/screen-rotate.svg'
+import screenRotateIcon from './assets/svg/screen-rotate.svg'
 import gsap from 'gsap'
-import githubLogo from './assets/github_logo.svg'
-import linkedinLogo from './assets/linkedin_logo.svg'
-import instaLogo from './assets/insta_logo.svg'
+import githubLogo from './assets/svg/github_logo.svg'
+import linkedinLogo from './assets/svg/linkedin_logo.svg'
+import instaLogo from './assets/svg/insta_logo.svg'
+import musicOnIcon from './assets/svg/music-on.svg'
+import musicOffIcon from './assets/svg/music-off.svg'
+import soundOnIcon from './assets/svg/sound-on.svg'
+import soundOffIcon from './assets/svg/sound-off.svg'
+import ambientTrack from './assets/sfx/wethands.mp3'
+import hoverSfx from './assets/sfx/hover.mp3'
+import meow1Sfx from './assets/sfx/meow/meow1.mp3'
+import meow2Sfx from './assets/sfx/meow/meow2.mp3'
+import meow3Sfx from './assets/sfx/meow/meow3.mp3'
 
 // Images
 const dappa1 = '/images/DAPPA/dappa_1.png'
@@ -373,6 +382,12 @@ function App() {
   const [activeImage, setActiveImage] = useState<string | null>(null)
   const [pointerCursor, setPointerCursor] = useState(false)
   const [joystickPos, setJoystickPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 })
+  const [isMusicMuted, setIsMusicMuted] = useState(false)
+  const [isSfxMuted, setIsSfxMuted] = useState(false)
+  const isSfxMutedRef = useRef(false)
+  const musicAudioRef = useRef<HTMLAudioElement | null>(null)
+  const hoverAudioRef = useRef<HTMLAudioElement | null>(null)
+  const meowAudioRefs = useRef<HTMLAudioElement[]>([])
 
 
   // Check if the device is a mobile device using touch input
@@ -396,6 +411,50 @@ function App() {
 
   const realGltfProgressRef = useRef(0)
   const worldLoadTickRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  useEffect(() => {
+    const musicAudio = new Audio(ambientTrack)
+    musicAudio.loop = true
+    musicAudio.volume = 0.25
+    musicAudio.muted = false
+    musicAudioRef.current = musicAudio
+
+    const hoverAudio = new Audio(hoverSfx)
+    hoverAudio.volume = 0.8
+    hoverAudio.muted = false
+    hoverAudioRef.current = hoverAudio
+
+    const meowAudios = [meow1Sfx, meow2Sfx, meow3Sfx].map((src) => {
+      const audio = new Audio(src)
+      audio.volume = 0.2
+      audio.muted = false
+      return audio
+    })
+    meowAudioRefs.current = meowAudios
+
+    return () => {
+      musicAudio.pause()
+      hoverAudio.pause()
+      for (const meowAudio of meowAudios) meowAudio.pause()
+      musicAudioRef.current = null
+      hoverAudioRef.current = null
+      meowAudioRefs.current = []
+    }
+  }, [])
+
+  useEffect(() => {
+    if (musicAudioRef.current) musicAudioRef.current.muted = isMusicMuted
+  }, [isMusicMuted])
+
+  useEffect(() => {
+    isSfxMutedRef.current = isSfxMuted
+    if (hoverAudioRef.current) hoverAudioRef.current.muted = isSfxMuted
+    for (let i = 0; i < meowAudioRefs.current.length; i += 1) {
+      const meowAudio = meowAudioRefs.current[i]
+      if (!meowAudio) continue
+      meowAudio.muted = isSfxMuted
+    }
+  }, [isSfxMuted])
 
   // Update the rotate hint based on the window size
   useEffect(() => {
@@ -462,6 +521,23 @@ function App() {
       },
       onHotspotClick: (id) => setActiveModal(id),
       onCursorChange: (isPointer) => setPointerCursor(isPointer),
+      onInteractableHover: () => {
+        const sfx = hoverAudioRef.current
+        if (!sfx || isSfxMutedRef.current) return
+        sfx.currentTime = 0
+        sfx.play().catch(() => {
+          // Ignore occasional play interruptions from rapid hover changes.
+        })
+      },
+      onInteractableClick: () => {
+        if (isSfxMutedRef.current || meowAudioRefs.current.length === 0) return
+        const randomIndex = Math.floor(Math.random() * meowAudioRefs.current.length)
+        const randomMeow = meowAudioRefs.current[randomIndex]
+        randomMeow.currentTime = 0
+        randomMeow.play().catch(() => {
+          // Ignore occasional play interruptions from repeated interactions.
+        })
+      },
       getMoveInput: isMobileOS ? () => moveInputRef.current : undefined,
     })
 
@@ -474,6 +550,9 @@ function App() {
   const handleEnter = useCallback(() => {
     setEntered(true)
     startEnterAnimation()
+    musicAudioRef.current?.play().catch(() => {
+      // Some browsers may still defer playback; user can trigger again via controls.
+    })
   }, [])
   const handleCloseModal = useCallback(() => {
     setActiveModal(null)
@@ -482,6 +561,12 @@ function App() {
   }, [])
   const handleCloseImage = useCallback(() => {
     setActiveImage(null)
+  }, [])
+  const handleToggleMusicMute = useCallback(() => {
+    setIsMusicMuted((prev) => !prev)
+  }, [])
+  const handleToggleSfxMute = useCallback(() => {
+    setIsSfxMuted((prev) => !prev)
   }, [])
 
   useEffect(() => {
@@ -688,6 +773,39 @@ function App() {
               }}
             />
           </div>
+        </div>
+      )}
+
+      {entered && (
+        <div className="audio-controls">
+          <button
+            type="button"
+            className="audio-toggle"
+            onClick={handleToggleMusicMute}
+            aria-label={isMusicMuted ? 'Unmute background music' : 'Mute background music'}
+            aria-pressed={isMusicMuted}
+          >
+            <img
+              src={isMusicMuted ? musicOffIcon : musicOnIcon}
+              alt=""
+              className="audio-toggle-icon"
+              aria-hidden="true"
+            />
+          </button>
+          <button
+            type="button"
+            className="audio-toggle"
+            onClick={handleToggleSfxMute}
+            aria-label={isSfxMuted ? 'Unmute sound effects' : 'Mute sound effects'}
+            aria-pressed={isSfxMuted}
+          >
+            <img
+              src={isSfxMuted ? soundOffIcon : soundOnIcon}
+              alt=""
+              className="audio-toggle-icon"
+              aria-hidden="true"
+            />
+          </button>
         </div>
       )}
 

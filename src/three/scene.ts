@@ -20,6 +20,8 @@ export type InitOptions = {
   onLoaded?: () => void
   onHotspotClick?: (id: string) => void
   onCursorChange?: (pointer: boolean) => void
+  onInteractableHover?: () => void
+  onInteractableClick?: () => void
   /** Optional movement source for mobile joystick / virtual pad */
   getMoveInput?: () => MoveInput
 }
@@ -47,6 +49,8 @@ export function initThree({
   onLoaded,
   onHotspotClick,
   onCursorChange,
+  onInteractableHover,
+  onInteractableClick,
   getMoveInput,
 }: InitOptions) {
   const scene = new THREE.Scene()
@@ -411,6 +415,7 @@ export function initThree({
       const hit = intersects[0].object
       const interactable = findInteractable(hit)
       if (!interactable) return
+      onInteractableClick?.()
       const baseName = getBaseName(interactable.name)
       if (linkObjects[baseName]) {
         const link = linkObjects[baseName]
@@ -430,8 +435,10 @@ export function initThree({
     }
   }
 
-  function onClick() {
+  function onClick(event: MouseEvent) {
     if (modalOpen) return
+    const target = event.target
+    if (target instanceof Element && target.closest('.audio-controls')) return
     handleInteraction()
   }
 
@@ -597,7 +604,10 @@ export function initThree({
       ? findInteractable(hoverIntersects[0].object)
       : null
 
-    if (newHovered !== hoveredObject) hoveredObject = newHovered
+    if (newHovered !== hoveredObject) {
+      if (newHovered && !modalOpen) onInteractableHover?.()
+      hoveredObject = newHovered
+    }
     onCursorChange?.(hoveredObject !== null)
 
     for (const obj of intersectObjects) {
