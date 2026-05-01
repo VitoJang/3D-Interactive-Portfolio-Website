@@ -51,7 +51,7 @@ const modalContent: Record<string, ModalEntry> = {
   // ── Career Highway ──
   'DAPPA': {
     title: 'DAPPA',
-    subtitle: 'Junior Frontend Developer | Hybrid | Summer Hill, Sydney\nMarch 2024 ~ May 2025',
+    subtitle: 'Junior Frontend Developer | Hybrid | Summer Hill, Sydney\nMarch 2024 ~ July 2025',
     tech: 'React Native, TypeScript, NextJS, Xcode, Plasmo',
     description: <>
       DAPPA is a fashion-tech startup building an AI-powered <strong>Virtual Try-On (VTON)</strong> platform. I joined as a <strong>Junior Frontend Developer</strong> and contributed to the initial launch and ongoing development of the DAPPA App on iOS and Android, as well as the DAPPA Clip Chrome Extension.
@@ -108,7 +108,7 @@ const modalContent: Record<string, ModalEntry> = {
   },
   'Project_Two': {
     title: '3D Portfolio Website (VitoFolio)',
-    subtitle: 'Personal Project | 2026',
+    subtitle: 'Personal Project | Feb 2026',
     tech: 'React, TypeScript, Three.js, Blender, Vite',
     description: <>
       An interactive <strong>3D portfolio website</strong> called <strong>"VitoFolio"</strong>, the very site you're exploring right now! Features a controllable and animated cat character (inspired by my cat), a fully custom low-poly <strong>Blender-designed</strong> island map, and interactive clickable objects to explore more about me, my projects, and my career.
@@ -270,7 +270,7 @@ const modalContent: Record<string, ModalEntry> = {
               {' | '}
               <strong>Club Advisor</strong>
               {' · '}
-              Jan 2025 – 2026
+              Jan 2025 – Jan 2026
             </div>
           </li>
           <li>

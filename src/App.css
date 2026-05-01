@@ -242,7 +242,7 @@
 }
 
 .modal-description-list::before {
-  content: 'Contributions';
+  content: 'Impact';
   display: block;
   margin-left: -20px;
   margin-bottom: 4px;
