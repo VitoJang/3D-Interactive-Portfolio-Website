@@ -23,9 +23,8 @@ const dappa3 = '/images/DAPPA/dappa_3.png'
 const dappaClip = '/images/DAPPA/dappaclip.png'
 const dfdsystem1 = '/images/Projects/DFDSystem_1.png'
 const dfdsystem2 = '/images/Projects/DFDSystem_2.png'
-const nnfl1 = '/images/Projects/NNFL1.png'
-const nnfl2 = '/images/Projects/NNFL2.png'
-const nnfl3 = '/images/Projects/NNFL3.png'
+const moeDemo1 = '/images/Projects/moeDemo1.gif'
+const moeDemo2 = '/images/Projects/moeDemo2.gif'
 const bf1 = '/images/Projects/bf1.png'
 const bf2 = '/images/Projects/bf2.png'
 const crm1 = '/images/Projects/crm1.png'
@@ -140,28 +139,27 @@ const modalContent: Record<string, ModalEntry> = {
     subtitle: 'Neural Network and Fuzzy Logic UTS | March 2026 – Current',
     tech: 'Python, PyTorch',
     description: <>
-      An undergoing project aimed to train an autonomous navigation system for hospital delivery robots under a <strong>2D simulation</strong> environment alongside a simulated <strong>LiDAR sensors</strong>.
+      An <strong>autonomous navigation</strong> system for <strong>hospital delivery robots</strong> in a custom <strong>2D simulation environment</strong> with simulated <strong>LiDAR</strong> sensors, built to train and evaluate two <strong>neural navigation policies</strong>, a <strong>Multi-Layer Perceptron (MLP)</strong> and a <strong>Mixture-of-Experts (MoE)</strong> model. These models were trained by imitating <strong>rule-based expert policies</strong> to train and compare their performances across complex hospital environments.
       <ul className="modal-description-list">
-        <li>Train a <strong>Mixture-of-Experts (MoE)</strong> architecture model using <strong>imitation learning</strong> for an accurate autonomous navigation performance.</li>
-        <li>Create complex 2D simulation environments with random obstacles and <strong>two expert policies</strong> (one for navigating around obstacles and one for navigating to the goal), where they are then used to train the <strong>MoE model</strong>.</li>
+        <li>Designed a <strong>2D hospital robot simulator</strong> from scratch with <strong>LiDAR</strong> sensing and multiple map layouts, then collected 500 successful expert navigation runs to train both an <strong>MLP</strong> and a <strong>MoE</strong> policy via <strong>imitation learning</strong> in <strong>PyTorch</strong>.</li>
+        <li>Trained and evaluated both <strong>MLP</strong> and <strong>MoE</strong> policy via <strong>behaviour cloning</strong>, where the learned policies outperformed the raw expert (<strong>72% vs 59% success rate</strong>), with MoE achieving the lowest collision rate (<strong>21%</strong>) and interpretable <strong>gating weights</strong> revealing which expert branch activates per navigation context.</li>
       </ul>
     </>,
-    images: [nnfl1, nnfl3, nnfl2],
-    // links: [
-    //   { label: 'GitHub', url: '#', icon: githubLogo },
-    // ]
+    images: [moeDemo1, moeDemo2],
+    links: [
+      { label: 'GitHub', url: 'https://github.com/VitoJang/MoE-Autonomous-Navigation-Robot-via-Imitation-Learning', icon: githubLogo },
+    ]
   },
   'Project_Five': {
     title: 'CNN Driver Fatigue Detection System',
     subtitle: 'Engineering Capstone UTS | Mar 2026 – Current',
     tech: 'Python, MobileNetV2, TensorFlow',
     description: <>
-      An engineering capstone project aimed to design and evaluate <strong>deep learning (CNN)</strong> and <strong>computer vision</strong> techniques <strong>(Mediapipe Face Mesh)</strong> to detect fatigue and drowsiness in drivers with high accuracy and real-time performance, after exploring and identifying gaps in existing research.
+      An <strong>Engineering Capstone</strong> project aimed to design, evaluate, and investigate whether <strong>CLAHE (Contrast Limited Adaptive Histogram Equalisation)</strong> contrast preprocessing could improve a <strong>MobileNetV2</strong>-based <strong>CNN</strong> driver <strong>drowsiness detection</strong> system without sacrificing <strong>real-time performance</strong>. A <strong>baseline model</strong> and a <strong>CLAHE-enhanced model</strong> were trained on 20,000 eye-region crops and integrated with a traditional <strong>MediaPipe EAR/MAR</strong> computer vision pipeline into a full <strong>hybrid detection system</strong>.
       <ul className="modal-description-list">
-        <li>Trained a <strong>MobileNetV2</strong>-based CNN model using <strong>TensorFlow</strong> for real-time drowsiness classification.</li>
-        <li>Used <strong>Mediapipe Face Mesh</strong> to extract facial landmarks and calculate both the <strong>mouth aspect ratio (MAR)</strong> and <strong>eye aspect ratio (EAR)</strong> to detect drowsiness.</li>
-        <li>Implemented a hybrid model architecture with a <strong>CNN</strong> and <strong>LSTM</strong> to detect fatigue and drowsiness in drivers.</li>
-        <li>Utilised <strong>scikit-learn</strong> to evaluate metrics (<strong>confusion matrix, accuracy, precision, recall, F1 score, and area under the ROC curve</strong>) and real-time model performance evaluation (<strong>FPS, latency, and accuracy</strong>) through <strong>OpenCV</strong>.</li>
+        <li>Trained two <strong>MobileNetV2</strong> classifiers via <strong>transfer learning</strong> on the <strong>Driver Drowsiness Dataset</strong>, where the <strong>CLAHE-enhanced model</strong> achieved <strong>98.70% accuracy</strong> (<strong>ROC-AUC 0.9991</strong>), outperforming the <strong>CNN baseline model</strong> and reducing total misclassifications by <strong>15.22%</strong></li>
+        <li>Built a <strong>hybrid detection system</strong> combining the <strong>CNN classifier</strong> with <strong>MediaPipe Face Mesh</strong> <strong>EAR/MAR</strong> threshold logic, reaching <strong>15 FPS</strong> at <strong>42ms latency</strong> post-optimisation, meeting <strong>real-time deployment</strong> requirements for <strong>resource-constrained hardware</strong>.</li>
+        <li>Evaluated all three methodologies (<strong>CNN baseline</strong>, <strong>CNN+CLAHE</strong>, <strong>EAR/MAR standalone</strong>) side-by-side using <strong>accuracy</strong>, <strong>precision</strong>, <strong>recall</strong>, <strong>F1</strong>, and <strong>ROC-AUC</strong>, establishing a <strong>reproducible benchmark</strong> that addresses a practical reporting gap in the existing <strong>fatigue detection</strong> literature.</li>
       </ul>
     </>,
     images: [dfdsystem1, dfdsystem2],
