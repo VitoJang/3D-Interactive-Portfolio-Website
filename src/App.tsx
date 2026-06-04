@@ -21,8 +21,10 @@ import meow3Sfx from './assets/sfx/meow/meow3.mp3'
 const dappa1 = '/images/DAPPA/dappa_1.png'
 const dappa3 = '/images/DAPPA/dappa_3.png'
 const dappaClip = '/images/DAPPA/dappaclip.png'
-const dfdsystem1 = '/images/Projects/DFDSystem_1.png'
-const dfdsystem2 = '/images/Projects/DFDSystem_2.png'
+const dfdSystem1 = '/images/Projects/DFDSystem1.png'
+const dfdSystem2 = '/images/Projects/DFDSystem2.png'
+const dfdSystem3 = '/images/Projects/DFDSystem3.png'
+const dfdSystem4 = '/images/Projects/DFDSystem4.png'
 const moeDemo1 = '/images/Projects/moeDemo1.gif'
 const moeDemo2 = '/images/Projects/moeDemo2.gif'
 const bf1 = '/images/Projects/bf1.png'
@@ -162,20 +164,21 @@ const modalContent: Record<string, ModalEntry> = {
         <li>Evaluated all three methodologies (<strong>CNN baseline</strong>, <strong>CNN+CLAHE</strong>, <strong>EAR/MAR standalone</strong>) side-by-side using <strong>accuracy</strong>, <strong>precision</strong>, <strong>recall</strong>, <strong>F1</strong>, and <strong>ROC-AUC</strong>, establishing a <strong>reproducible benchmark</strong> that addresses a practical reporting gap in the existing <strong>fatigue detection</strong> literature.</li>
       </ul>
     </>,
-    images: [dfdsystem1, dfdsystem2],
-    // links: [
-    //   { label: 'GitHub', url: '#', icon: githubLogo },
-    // ]
+    images: [dfdSystem1, dfdSystem2, dfdSystem3, dfdSystem4],
+    links: [
+      { label: 'GitHub', url: 'https://github.com/VitoJang/CNN-Driver-Fatigue-Detection-System-Project', icon: githubLogo },
+    ]
   },
 
   // ── About Me Street ──
   'Board_Games': {
     title: 'Board Games',
-    description: 'I believe board/card games or games night are one of the best ways to spend time with your family and friends (with the sole exception of sports, of course), that being said, some of my favourites are the yearly Monopoly sessions and weekly Poker nights!',
+    description: 'I really do believe board/card games are one of the best ways to spend time with your family and friends (with the sole exception of sports, of course). Hence, my love for poker nights with the boys.',
     images: [
       '/images/AboutMe/games1.jpg',
       '/images/AboutMe/games2.jpg',
       '/images/AboutMe/games3.jpg',
+      '/images/AboutMe/games8.jpg',
       '/images/AboutMe/games4.jpg',
       '/images/AboutMe/games5.jpg',
       '/images/AboutMe/games6.jpg',
@@ -197,7 +200,7 @@ const modalContent: Record<string, ModalEntry> = {
   },
   'Sports': {
     title: 'Sports',
-    description: 'Outside of my room, you will see me playing all sorts of sports and phyiscal activities. Soccer, badminton, pickleball, oztag, snowboarding, volleyball, golf... these are some of many sports I play throughout the year. My favourite at the moment is tennis, a sport I recently picked up and have been getting humbled on (for now).',
+    description: 'I am an advocate for life-maxxing. That being said, I absolutely love playing sports and challenging myself to new ones. Soccer, golf, badminton, pickleball, oztag, snowboarding, volleyball... these are some of many I am mediocre at (low cortisol 😮‍💨). At the moment, I am currently getting humbled on tennis (for now).',
     images: [
       '/images/AboutMe/sports1.jpg',
       '/images/AboutMe/sports9.JPG',
@@ -207,12 +210,13 @@ const modalContent: Record<string, ModalEntry> = {
       '/images/AboutMe/sports5.jpg',
       '/images/AboutMe/sports6.jpg',
       '/images/AboutMe/sports7.JPG',
-      '/images/AboutMe/sports8.jpg'
+      '/images/AboutMe/sports8.jpg',
+      '/images/AboutMe/sports10.jpg'
     ],
   },
   'Travel': {
     title: 'Travel',
-    description: 'Like every other gen-z out there, I love to travelling and exploring new places, cultures, and most importantly, food!',
+    description: 'Like every other gen-z out there, I love travelling. My bucket list is filled with places I want to travel and explore because my love language is airport departures and window seats.',
     images: [
       '/images/AboutMe/travel1.jpg',
       '/images/AboutMe/travel2.jpg',
@@ -230,7 +234,7 @@ const modalContent: Record<string, ModalEntry> = {
   },
   'TV': {
     title: 'TV',
-    description: 'Vidoe games have always been a part of life since I was a kid, and will continue to do so. I started from Kart Rider and Minecraft, and have been playing a variety of games since then. As of today, I am playing Teamfight Tactics (TFT) and Spiderman 2.',
+    description: 'Gaming has always been a part of my life and will continue to do so. Although my golden days of grinding through Minecraft and Destiny (RIP) for more than 2 weeks are long gone, I still enjoy playing a variety of games, such as Teamfight Tactics (TFT) and Spiderman.',
     images: [
       '/images/AboutMe/video_games1.jpg',
       '/images/AboutMe/video_games2.jpg',
