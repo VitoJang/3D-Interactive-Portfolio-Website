@@ -839,6 +839,7 @@ function App() {
                   onClick={handleCloseModal}
                   aria-label="Close"
                 >
+                  {/* TODO:replace with svg icon */}
                   &#x2715;
                 </button>
               </div>
@@ -929,6 +930,7 @@ function App() {
                 onClick={handleCloseImage}
                 aria-label="Close image preview"
               >
+                {/* TODO: replace with svg icon */}
                 &#x2715;
               </button>
               <ImageLightboxContent
